@@ -27,13 +27,32 @@
 		},
 		/* add additional r packages here */
 		"ghcr.io/rocker-org/devcontainer-features/r-packages:1": {
-			"packages": "github::rstudio/renv,tidyverse,here,httpgd,janitor,github::360-info/themes360info"
+			"packages": "github::rstudio/renv,tidyverse,here,httpgd,janitor,"
 		}
-	}
+	},
 
 	/* Use 'postCreateCommand' to run commands after the container is created
 	  (for example, copy some extra fonts to /usr/local/share/fonts) */
-	// "postCreateCommand": "",
+	"postCreateCommand": "cp .devcontainer/fonts/*.ttf /usr/local/share/fonts",
+
+	"customizations": {
+		"codespaces": {
+			"openFiles": [
+				".devcontainer/welcome.md"
+			]
+		},
+		"vscode": {
+      "extensions": [
+				"reditorsupport.r",
+				"quarto.quarto",
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-toolsai.jupyter",
+				"mechatroner.rainbow-csv"
+			]
+		}
+	}
+	
 
 	/* Use 'forwardPorts' to make a list of ports inside the container available
 	   locally. */
