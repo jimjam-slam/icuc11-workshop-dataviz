@@ -1,9 +1,10 @@
 # ICUC11 Data Vis Workshop
 
-## Getting started
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/jimjam-slam/icuc11-workshop-dataviz?quickstart=1)
 
-[Launch the workshop Codespace](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=674194662&machine=basicLinux32gb)
+Click the button above to launch the workshop environment, or to recover an instance you were using (if you closed the browser tab). It'll take a few minutes to set itself up.
 
-The above link will create a new Codespace, even if you already have one running.
+Once it's ready to go,
 
-To recover a space that you previously created (eg. if you accidentally closed your browser), go to <https://github.com/codespaces> and choose your space from the list (it'll have a randomly assigned name).
+1. Click the "View workshop slides" button on the bar along the bottom to view the slides; or
+2. click the "Start workshop exercises" button next to it to launch the interactive exercises.
