@@ -1,0 +1,12 @@
+{
+  "actionButtons": {
+    "loadNpmCommands":false,
+    "commands": [
+        {
+            "name": "$(debug-start) Start workshop exercises",
+            "command": "Rscript -e 'learnr::run_tutorial(\"exercises.rmd\")'",
+            "singleInstance": true
+        }
+    ]
+  }
+}

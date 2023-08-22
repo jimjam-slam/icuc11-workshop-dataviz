@@ -2,9 +2,6 @@
 .DS_Store
 Thumbs.db
 
-# vscode
-.vscode
-
 # r
 /renv
 .Rhistory
