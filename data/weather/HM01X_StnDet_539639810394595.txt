@@ -1,0 +1,6 @@
+
+*  Percentage complete between first and last records assumes 48 observation per day.
+   Some days there may be more then 48 reports if there have been significant changes in 
+   the weather, so the percentage completeness is an estimate. 
+
+st,086068,86  ,VIEWBANK                                ,09/1999,       ,-37.7408, 145.0972,GPS            ,VIC,  66.1,  66.4,95874,2005,2017,102,  0,100,  0,  0,  0,#
