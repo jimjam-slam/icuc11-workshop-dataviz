@@ -357,6 +357,52 @@ ggplot(df_long) +
     )
 ```
 
+### Adding text annotations
+
+Sometimes, labelling things directly is the easiest way to make something clearer—especially if you can't make assumptions about your readers' familiarity with the subject of the plot.
+
+There're a few ways to annotate a plot:
+
+- We could label every point using `geom_text()`—but with hundreds of points, this could be hard to read!
+- We could label a few interesting points by filtering our dataset and passing it as the `data` argument to `geom_text()`:
+  - `geom_text(data = interesting_points_only)`
+- We could add a couple of fixed labels to
+
+let's try the last option:
+
+```{r}
+#| label: ex2-annotate
+
+my_labels <- tribble(
+  ~ name,          ~ x,   ~ y, ~ text,
+  "Northcote",      25,   30,   "Residential areas ramp up\nin the heat and cold,\neven on weekends.",
+  "Port Melbourne", 20,   17.5, "Industrial areas see usage fall\na lot on weekends."
+)
+
+ggplot(df_long) +
+  aes(x = tmax, y = demand, colour = working) +
+  geom_point(size = 2) +
+  facet_wrap(vars(name)) +
+  labs(
+    x = "2m air temperature [°C]",
+    y = "Electricity demand [MW]") +
+  geom_text(
+    aes(x = x, y = y, label = text),
+    data = my_labels,
+    colour = "black",
+    size = 6)
+```
+
+Positioning labels can be cumbersome sometimes!
+
+You can use the `{ggannotate}` package to get a nice app for writing the code to add annotations to plots. It gives you code you can copy and paste:
+
+```{r}
+#| label: ggannotate-example
+
+ggannotate::ggannotate()
+```
+
 ### Other ideas
 
 - Text annotations can be powerful, especially if your plot has more than one message or more than one focus point. Viewers are especially likely to read text annotations if they don't immediately and intuitively understand the visuals.
