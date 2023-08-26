@@ -27,7 +27,7 @@
 		},
 		/* add additional r packages here */
 		"ghcr.io/rocker-org/devcontainer-features/r-packages:1": {
-			"packages": "github::rstudio/renv,tidyverse,httpgd,here,janitor,ggtext,github::rstudio/learnr"
+			"packages": "github::rstudio/renv,tidyverse,httpgd,here,janitor,ggtext,github::mattcowgill/ggannotate"
 		}
 	},
 
@@ -49,7 +49,7 @@
 				"ms-python.vscode-pylance",
 				"ms-toolsai.jupyter",
 				"mechatroner.rainbow-csv",
-				// "seunlanlege.action-buttons"
+				"seunlanlege.action-buttons"
 			]
 		}
 	}
