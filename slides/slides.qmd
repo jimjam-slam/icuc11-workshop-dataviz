@@ -327,6 +327,8 @@ How would you change this plot for a more general audience?
 
 # Thank you!
 
+Thanks **Mat Lipson** and the [**NEAR program**](https://near.csiro.au/) (BOM + CSIRO) for our example data, and the **ICUC11 committee** for inviting me!
+<br><br>
 🧵 [**@jimjam.slam**](https://threads.net/@jimjam.slam)
 
 <i class="bi bi-github"></i> [**github.com/360-info**](https://github.com/jimjam-slam)
