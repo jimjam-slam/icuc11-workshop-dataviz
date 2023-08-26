@@ -4,9 +4,9 @@ You've opened the workshop cloud environment!
 
 There are two fils we're going to use today:
 
-[`slides.qmd`](/slides.qmd) is the content of the slides that I'll present. If you'd like to follow along with them, open the file and click the "Render" button up the top right.
+[`slides/slides.qmd`](/slides/slides.qmd) is the content of the slides that I'll present. If you'd like to follow along with them, open the file and click the "Render" button up the top right.
 
-[`exercises.qmd`](/exercises.qmd) contains the code for the plots we'll play with today. When you open the file, you'll see "chunks" of code that look like this (with different colours!):
+[`exercises/exercises.qmd`](/exercises/exercises.qmd) contains the code for the plots we'll play with today. When you open the file, you'll see "chunks" of code that look like this (with different colours!):
 
 ```{r}
 #| label: sample-plot
