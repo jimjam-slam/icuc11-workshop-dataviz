@@ -15,3 +15,9 @@ Thumbs.db
 # output folder (you may want to exclude files when we publish!)
 /out/*
 !/out
+
+# output files
+slides/slides_files
+slides.html
+exercises/exercises_files
+exercises.html

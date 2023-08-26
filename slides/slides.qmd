@@ -1,0 +1,334 @@
+---
+format:
+  revealjs: 
+    theme: [default, style.scss]
+    highlight-style: github
+    width: 1400
+    footer: "[codespaces.new/jimjam-slam/icuc11-workshop-dataviz?quickstart=1](https://codespaces.new/jimjam-slam/icuc11-workshop-dataviz?quickstart=1)"
+    css:
+      - https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css
+    resources:
+      - qr-code-codespace.svg
+---
+
+## {.center}
+
+<h1 class="text-indigo-pink">Data vis<h1>
+
+<h2>Improving your plots for colleagues and for others</h2>
+
+::: {style="margin-top:50px"}
+### JAMES GOLDIE {.text-orange-gold}
+
+Data and Digital Storytelling Lead, 360info
+:::
+
+## Getting started {.center}
+
+
+:::{.callout-tip style="margin-block: 100px"}
+## Today's workshop uses a cloud environment. To access it, you need to:
+
+1. Get an account for free at **[github.com](https://github.com)**
+
+2. Go to **<https://codespaces.new/jimjam-slam/icuc11-workshop-dataviz?quickstart=1>**
+:::
+
+- If you close the browser window, use the link to resume it (or just make another one if you're happy to start again).
+
+- It takes a few minutes to start up, so feel free to launch it now!
+
+# Hi! {.text-wash-black background="linear-gradient(45deg, #00aadd, #66dd00)"}
+
+## {.text-lime-cyan}
+
+::::: {.columns style="text-align:center;margin-top:50px;"}
+
+:::: {.column width="50%" style="margin-top:50px"}
+::: {.r-stack}
+![](images/graduation.gif){.fragment .fade-in-then-semi-out fragment-index=1 style="width:70%;transform:rotate(-5deg);" fig-alt="A picture of me and my PhD supervisor, Lisa Alexander, at my graduation."}
+
+![](images/mcccrh-zoom.png){.fragment .fade-in-then-semi-out fragment-index=2 style="transform:rotate(5deg);" fig-alt="A picture of me and MCCCRH staff members on Zoom."}
+
+![](images/mcccrh.gif){.fragment .fade-in-then-semi-out fragment-index=3 style="transform:rotate(-1deg);" fig-alt="A picture of me and MCCCRH staff members on a work trip."}
+
+![](images/mcccrh-projections.jpg){.fragment .fade-in-then-semi-out fragment-index=4 style="transform:rotate(1.5deg);" fig-alt="A picture of Graham Creed from the ABC presenting climate projections."}
+
+![](images/mcccrh-7news.gif){.fragment .fade-in fragment-index=5 style="transform:rotate(-3.5deg);" fig-alt="A picture of Jane Bunn presenting statistics on shrinking winters."}
+:::
+::::
+
+:::: {.column width="50%"  style="margin-top:25px"}
+::: {.fragment fragment-index=1}
+I used to be a climate + health researcher 
+:::
+::: {.fragment fragment-index=2}
+•
+
+Worked with **[CLEX](https://climateextremes.org.au)** and **[MCCCRH](https://monash.edu/mcccrh)** on climate change communication
+:::
+::: {.fragment fragment-index=6}
+•
+
+Now I'm a data journalist with
+
+[![](images/360logo.svg){style="width:50%;"}](https://360info.org)
+:::
+::::
+
+:::::
+
+## Poll {.text-lime-cyan}
+
+::: {.notes}
+Would love to find out more about all of you and what you're learning
+
+No personal info in this poll, just 2 Qs!
+
+1. What do you want to learn today?
+2. How confident do you feel using R and `{ggplot2}`?
+
+Take a moment to fill it in on your phone
+:::
+
+:::: {.columns}
+:::{.column width="40%"}
+![](images/qr-code-survey.svg){fig-alt="Scan this QR code to fill in the survey."}
+:::
+
+::: {.column width="60%" .center}
+<br>Take the survey at
+
+**<https://forms.gle/w9LLeWsWVZdnniYh8>**
+:::
+::::
+
+## What are you hoping to learn today? {.text-lime-cyan style="text-align: center;"}
+${respondentCount} respondents
+
+```{ojs}
+
+import { liveGoogleSheet } from "@jimjamslam/live-google-sheet";
+import { aq, op } from "@uwdata/arquero";
+
+surveyResults = liveGoogleSheet(
+  "https://docs.google.com/spreadsheets/d/e/" +
+  "2PACX-1vT46HBtu5Mj-qjujsI9uENS4iomEN0XcMpNYiKkOngnSR0xj1gwfc6Un_82CrgvSG5NVbN0x1ES39sC/" +
+  "pub?gid=13628160&single=true&output=csv",
+  15000, 1, 3);
+
+surveyResultsDf = aq.from(surveyResults)
+
+respondentCount = surveyResultsDf._names.length > 0 ?
+  surveyResultsDf
+  .filter(d => d.Timestamp != "")
+  .numRows() : 0;
+```
+
+```{ojs}
+// get the counts of people using and interested in tools
+hopingLearn = respondentCount > 0 ?
+  surveyResultsDf
+    .filter(d => d.Timestamp != "")
+    .derive({ answer: d => op.split(
+      d["What are you hoping to learn today?"], ", ") })
+    .select("answer")
+    .unroll("answer")
+    .groupby("answer")
+    .count() : []
+```
+
+```{ojs}
+plotLearn = respondentCount > 0 ?
+  Plot.plot({
+    marks: [
+      Plot.barX(hopingLearn, { y: "answer", x: "count", fill: "answer" }),
+      Plot.ruleX([respondentCount], { stroke: "#ffffff99" }),
+      Plot.axisY({
+        label: null,
+        lineWidth: 15,
+        marginLeft: 350
+      }),
+    ],
+    x : { label: "" },
+    y : { label: "", tickSize: 0 },
+    width: 1150,
+    height: 500,
+    style: {
+      fontSize: 24,
+    }
+  }) : md`Waiting for responses`;
+```
+
+```{ojs}
+//| output: false
+plotLearn.setAttribute("font-size", 24);
+```
+
+<!-- keep a qr code up in the top-right corner -->
+![](images/qr-code-survey.svg){style="position:fixed;bottom:0;right:0;width:140px;height:140px" fig-alt="A picture of a QR code to the survey."}
+
+## How comfortable do you feel with R and ggplot2? {.text-lime-cyan style="text-align: center;"}
+${respondentCount} respondents
+
+```{ojs}
+comfortLevels = respondentCount > 0 ?
+  surveyResultsDf
+    .filter(d => d.Timestamp != "")
+    .derive({ answer: d => op.split(
+      d["How comfortable do you feel with R and ggplot2?"], ", ") })
+    .select("answer")
+    .unroll("answer")
+    .groupby("answer")
+    .count() : []
+```
+
+```{ojs}
+plotComfort = respondentCount > 0 ?
+  Plot.plot({
+    marks: [
+      Plot.barX(comfortLevels, { y: "answer", x: "count", fill: "answer" }),
+      Plot.ruleX([respondentCount], { stroke: "#ffffff99" }),
+      Plot.axisY({
+        label: null,
+        lineWidth: 15,
+        marginLeft: 350
+      }),
+    ],
+    x : { label: "" },
+    y : { label: "", tickSize: 0 },
+    width: 1150,
+    height: 500,
+    style: {
+      fontSize: 24,
+    }
+  }) : md`Waiting for responses`;
+```
+
+```{ojs}
+//| output: false
+plotComfort.setAttribute("font-size", 24);
+```
+
+<!-- keep a qr code up in the top-right corner -->
+![](images/qr-code-survey.svg){style="position:fixed;bottom:0;right:0;width:140px;height:140px" fig-alt="A picture of a QR code to the survey."}
+
+# [Improving]{.hl .hl-gold} your plots {.text-wash-black background="linear-gradient(45deg, #f37335, #fdc830)"}
+
+## Who is it for? {.text-orange-gold .center style="text-align:center"}
+
+A lot of data vis advice is just communication advice!
+<br><br>
+**Who** is your plot for?
+
+**What** do you need them to know or do?
+
+**When and how** will they see your plot?
+
+What are they likely to **know already?**
+
+## What will your readers see first? {.text-orange-gold .center style="text-align:center"}
+
+Information designers call this **visual hierarchy**.
+<br><br>
+What did you see first on this slide? What did you see second?
+
+Why?
+
+## {.center style="text-align:center"}
+
+When all of the elements on your plot look the same, it's really hard for people to decide what to focus on. Without that focus, it's difficult for your plot to lead to a conclusion. Instead, you want to vary your plot elements, drawing attention to the most important things first. There are lots of ways to do this: bolding text, making it bigger, using colours, and taking advantage of natural reading direction can all help to establish visual hierarchy.
+
+## {.center style="text-align:center"}
+
+:::{style="font-size: 75%"}
+[When all of the elements on your plot]{style="color: #bbbbbb"} **look the same**, [it's]{style="color: #bbbbbb"} **really hard for people** [to decide what to focus on.]{style="color: #bbbbbb"}
+<br><br>
+[Without that focus, it's difficult for your plot to lead to a conclusion.]{style="color: #bbbbbb"}
+<br><br>
+[Instead, you want to]{style="color: #bbbbbb"} **vary your plot elements**[, drawing attention to the]{style="color: #bbbbbb"} **most important things** [first.]{style="color: #bbbbbb"}
+<br><br>
+[There are lots of ways to do this:]{style="color: #bbbbbb"}
+:::
+
+::::{.columns style="font-size: 75%"}
+:::{.column width="30%"}
+**bolding text**<br>
+[**making it bigger**]{style="font-size:125%"}<br>
+:::
+:::{.column width="30%"}
+[**using striking colours...**]{style="color: #dd0033"}<br>
+[... or softer colours]{style="color: #bbbbbb"}
+:::
+
+:::{.column width="30%"}
+**taking advantage of natural reading direction** 
+:::
+::::
+
+:::{style="font-size: 75%; margin-top: 50px"}
+[can all help to establish visual hierarchy.]{style="color: #bbbbbb"}
+:::
+
+## When to draw things, and when not to {.text-orange-gold .center style="text-align:center"}
+
+Some data vis practitioners refer to a principle called the **data-to-ink ratio**
+<br><br>
+The idea is to minimise the amount of "ink" for the amount of data you're trying to convey.
+
+## When to draw things, and when not to {.text-orange-gold .center style="text-align:center"}
+
+It's definitely possible to take this principle **too far**—sometimes redundancy can be helpful for people!
+<br><br>
+But it's always worth asking the **purpose plot elements serve**, and whether your plot has a focus or is **too busy**
+
+## When to draw things, and when not to {.text-orange-gold .center style="text-align:center"}
+
+If your plot has too many things, or is **trying to tell multiple stories at once**, think about how you can help readers **build up** to that complexity:
+
+:::::{style="margin-top: 100px"}
+::::{.columns style="font-size: 75%;"}
+:::{.column width="30%"}
+Use animation to introduce elements one at a time
+:::
+:::{.column width="30%"}
+Make more than one plot
+:::
+
+:::{.column width="30%"}
+De-emphasise less important info or emphasise more important info
+:::
+::::
+:::::
+
+# [[Exercise 1:]{.hl-purple}<br>Improving a plot]{style="color:white"} { background="linear-gradient(45deg, #4a00e0, #ff0099)"}
+
+## Exercise 1 {.text-indigo-pink .center}
+
+Open the `exercises/exercises.qmd` file
+
+[or click the "Start workshop exercises" button at the bottom]{style="font-size:75%"}
+<br><br>
+This notebook compares **peak electricity demand** each day to **maximum temperature** at **3 sites**
+<br><br>
+We'll split into groups and try to make a better plot **for publication**
+<br><br>
+Start by **discussing improvements** you'd make. If you know R, **try making these changes!** If not, I have some suggestions you can copy further down 😉
+
+# [[Exercise 2:]{.hl-red}<br>Changing audience]{style="color:white"} { background="linear-gradient(45deg, #ed213a, #93291e)"}
+
+## Exercise 2 {.text-red-brown .center}
+
+Our paper got accepted! Nice!
+<br><br>
+Now a journalist wants to report on it...
+<br><br>
+How would you change this plot for a more general audience?
+
+# Thank you!
+
+🧵 [**@jimjam.slam**](https://threads.net/@jimjam.slam)
+
+<i class="bi bi-github"></i> [**github.com/360-info**](https://github.com/jimjam-slam)
+
+<i class="bi bi-briefcase-fill"></i> [**360info.org**](https://360info.org)
