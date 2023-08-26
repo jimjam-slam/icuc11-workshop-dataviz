@@ -2,11 +2,16 @@
   "actionButtons": {
     "loadNpmCommands":false,
     "commands": [
-        {
-            "name": "$(run) Start workshop exercises",
-            "command": "Rscript -e 'learnr::run_tutorial(\"exercises/exercises.rmd\")'",
-            "singleInstance": true
-        },
+        /* is not working :( */
+        // {
+        //     "name": "$(run) Start workshop exercises",
+        //     "command": "vscode.openWith",
+        //     "useVsCodeApi": true,
+        //     "args": {
+        //       "resource": "exercises/exercises.qmd",
+        //       "viewId": "default"
+        //     }
+        // },
         {
           "name": "$(repo) View slides",
           "command": "quarto preview slides/slides.qmd",
