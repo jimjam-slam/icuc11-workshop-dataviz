@@ -17,59 +17,16 @@ If you accidentally close the R terminal, you can run these chunks again in a ne
 
 library(tidyverse)
 library(here)
-```
-
-```{r}
-#| label: load-weather
-
-weather <-
-  read_csv(
-    here("data", "weather", "HM01X_Data_086068_539639810394595.csv"),
-    col_names = c("datetime", "temperature"),
-    col_types = cols(
-      col_skip(),
-      col_datetime("%d/%m/%Y %H:%M"),
-      col_double(),
-      col_skip(),
-      col_skip(),
-      col_skip()),
-    skip = 1)
-```
-
-```{r}
-#| label: load-electricity
-
-# note to mat - i'm not sure what these columns mean
-# is bc the one i want?
-electricity <-
-  read_csv(
-    here("data", "electricity", "citipower_2005_2017.csv"),
-    # col_names = c("datetime", "temperature"),
-    # col_types = cols(
-    #   col_skip(),
-    #   col_datetime("%d/%m/%Y %H:%M"),
-    #   col_double(),
-    #   col_skip(),
-    #   col_skip(),
-    #   col_skip()),
-    # skip = 1,
-    na = c("", "nan")) |>
-  mutate(date = as.Date(`...1`)) |>
-  group_by(date) |>
-  summarise(mean_bc = mean(BC, na.rm = TRUE))
-```
-
-```{r}
-#| label: mat-code
-
-library(tidyverse)
-library(here)
 
 # these are the folders we'll use
 data_path <- here("data")
 plot_path <- here("plots")
 weather_path <-  here("data", "weather")
 dir.create(plot_path, showWarnings = FALSE)
+```
+
+```{r}
+#| label: analyse-weather
 
 # load the min and max temperature obs in
 obs_min <-
@@ -86,6 +43,12 @@ obs <-
   full_join(obs_min, obs_max, join_by(year, month, day)) |>
   filter(between(year, 2005, 2018)) |>
   mutate(date = ymd(paste(year, month, day)))
+```
+
+```{r}
+#| label: load-electricity
+
+site_ids <- c("NC", "PM", "DA")
 
 # get provider info for citipower
 info <-
@@ -106,6 +69,21 @@ info <-
     id = zone_substation_id) |>
   select(dnsp_short, name, id, everything())
 
+# get the 3 most common uses for each site
+info_3sites <-
+  info |>
+  filter(id %in% site_ids) |>
+  select(-dnsp_short, -dwellings, -persons) |>
+  pivot_longer(-c(name, id), names_to = "Use", values_to = "fraction") |>
+  group_by(id, name) |>
+  arrange(desc(fraction)) |>
+  slice(1:3) |>
+  mutate(use_string = paste0(
+    str_to_sentence(Use), ": ",
+    scales::percent(fraction))) |>
+  summarise(area_string = paste(use_string, collapse = "\n")) |>
+  ungroup()
+
 # get citipower electricity demand
 demand <-
   read_csv(
@@ -118,6 +96,10 @@ demand <-
   group_by(date) |>
   summarise(across(everything(), ~ max(.x, na.rm = TRUE))) |>
   select(-datetime)
+```
+
+```{r}
+#| label: merge-and-tidy
 
 # merge obs and demand; separate out weekends
 df <-
@@ -135,8 +117,11 @@ df_long <-
     -c(year, month, day, tmin, tmax, date, working),
     names_to = "site",
     values_to = "demand") |>
-  filter(site %in% c("NC", "PM", "DA")) |>
-  filter(!is.infinite(demand))
+  filter(site %in% site_ids) |>
+  filter(!is.infinite(demand)) |>
+  # also merge in the site names and use info
+  left_join(info_3sites, join_by(site == id), multiple = "all") |>
+  select(site, name, everything())
 ```
 
 Let's have a look at our processed data, `df_long`:
@@ -146,21 +131,223 @@ Let's have a look at our processed data, `df_long`:
 View(df_long)
 ```
 
-# Our first plot
+Okay, we're ready to visualise the data!
+
+# Exercise 1
+
+Here's a base plot to start from. it has all the essential elements:
 
 ```{r}
 #| label: plot-base
 
-# TODO - merge the site name in from `info` too
+ggplot(df_long) +
+  aes(x = tmax, y = demand, colour = working) +
+  geom_point(size = 2) +
+  facet_wrap(vars(name)) +
+  labs(
+    x = "2m air temperature [°C]",
+    y = "Electricity demand [MW]")
+```
+
+How could we change it?
+
+Here's a copy of the above chunk—try modifying it!
+
+```{r}
+#| label: modified-plot-base
 
 ggplot(df_long) +
   aes(x = tmax, y = demand, colour = working) +
   geom_point(size = 2) +
-  facet_wrap(vars(site)) +
-  scale_color_manual(values = c(Weekday = "royalblue", Weekend = "orangered")) +
-  theme_minimal() +
+  facet_wrap(vars(name)) +
   labs(
-    # title = ,
     x = "2m air temperature [°C]",
     y = "Electricity demand [MW]")
 ```
+
+Not sure how to implement some of your ideas? We'll discuss together afterward, but in the mean time, scroll down for some ideas...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(keep scrolling!)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Exercise 1 Ideas
+
+### Changing the colours used for weekends and weekdays
+
+Use `scale_color_brewer` to choose a colour palette from <colorbrewer2.org>, or use `scale_color_manual` to link custom colours to values yourself!
+
+The [`{ggplot2}` docs](https://ggplot2.tidyverse.org/reference/#scales) have lots of other `scale_colour_*` and `scale_fill_*` functions for generating colour scales.
+
+:::{.callout-tip}
+`scale_color_manual` is particularly handy if you need to make several plots representing the same things.
+
+If readers see the same colours again, they'll assume they mean the same thing and udnerstand your next more plot more quickly!
+:::
+
+```{r}
+#| label: ex1-customcolours
+
+ggplot(df_long) +
+  aes(x = tmax, y = demand, colour = working) +
+  geom_point(size = 2) +
+  facet_wrap(vars(name)) +
+  scale_color_manual(
+    values = c(
+      Weekday = "#33aaff",
+      Weekend = "#dd0033")) +
+  theme_minimal() +
+  labs(
+    x = "2m air temperature [°C]",
+    y = "Electricity demand [MW]")
+```
+
+### Adding a more minimal theme
+
+`{ggplot2}` has several "base themes" that are an easy place to start (you can customise them further, of course!).
+
+Some ones to try that be closer to what a journal expects are:
+
+* `theme_minimal()`
+* `theme_classic()`
+* `theme_bw()`
+
+```{r}
+#| label: ex1-basetheme
+
+ggplot(df_long) +
+  aes(x = tmax, y = demand, colour = working) +
+  geom_point(size = 2) +
+  facet_wrap(vars(name)) +
+  theme_minimal() +
+  labs(
+    x = "2m air temperature [°C]",
+    y = "Electricity demand [MW]")
+```
+
+
+### Changing pieces of text (that aren't linked to your data)
+
+Even once you have a base theme function, you can customise your plot further using the `theme` function. It has a [long list of options you can customise!](https://ggplot2.tidyverse.org/reference/theme.html)
+
+Most of the options you can customise need to be given an `element_*()` function that lets you pass in relevant options.
+
+For example, to make the X axis title bold and larger, you would add:
+
+:::{.callout-tip}
+The `rel()` function lets you change text size in fractional terms, relative to the plot's base size.
+
+This is handy, because if you add a `base_size` to your base theme function (eg. `theme_grey(base_size = 18)`), you can resize all the text in your plot proportionally, instead of having to update all the text sizes one at a time.
+:::
+
+```{r}
+#| label: ex1-largertext
+
+ggplot(df_long) +
+  aes(x = tmax, y = demand, colour = working) +
+  geom_point(size = 2) +
+  facet_wrap(vars(name)) +
+  theme(
+    axis.title.x = element_text(face = "bold", size = rel(1.2))
+  ) +
+  labs(
+    x = "2m air temperature [°C]",
+    y = "Electricity demand [MW]")
+```
+
+### Moving the legend
+
+Another set of theme options concerns the legend.
+
+Two I use nearly all the time are `legend.position = "top"` and `legend.direction = "horizontal"`: if the legend is essential to understand the plot, you probably want people to see it quickly! (You could also add `legend.justification = "left", especially if you have a plot title.)
+
+(You can also define the legend location as fractional coordinates if you want it to be inset on the plot. be careful about not covering up data if you do this!)
+
+```{r}
+#| label: ex1-largertext
+
+ggplot(df_long) +
+  aes(x = tmax, y = demand, colour = working) +
+  geom_point(size = 2) +
+  facet_wrap(vars(name)) +
+  theme(
+    legend.position = "top",
+    legend.direction = "horizontal",
+    legend.justification = "left"
+  ) +
+  labs(
+    x = "2m air temperature [°C]",
+    y = "Electricity demand [MW]")
+```
+
+## Exercise 2 Ideas
+
+### Adding a plot title (and subtitle, and caption)
+
+Journals often prefer you to tell a plot's story in the figure caption.
+
+But most people see the caption last. If you add a plot title and make it big enough, it'll probably be the first thing most people see!
+
+What should you use for a title? There are a few approaches. It's a good idea to make sure people can tell _what_ you're plotting, so you could use use a plot title or subtitle for that (especially if you've elected not to label an axis).
+
+"Editorialised" titles that explain the main message of the plot can also be great!
+
+A caption can be a great way to acknowledge your data sources, too.
+
+```{r}
+#| label: ex2-plottitle
+
+ggplot(df_long) +
+  aes(x = tmax, y = demand, colour = working) +
+  geom_point(size = 2) +
+  facet_wrap(vars(name)) +
+  labs(
+    x = "2m air temperature [°C]",
+    y = "Electricity demand [MW]",
+    title = "",
+    subtitle = "Peak daily electricity demand changes with temperature",
+    caption = "Data: NEAR project (BOM + CSIRO)"
+    )
+```
+
+### Other ideas
+
+- Text annotations can be powerful, especially if your plot has more than one message or more than one focus point. Viewers are especially likely to read text annotations if they don't immediately and intuitively understand the visuals.
+
+  * For example:
+    - "In Northcote, a residential area, demand is similar on weekdays and weekends—but is ramps up on very hot or cold days."
+    - "In industrial Port Melbourne, demand is lower on weekends, as some workplaces shut down."
+
+- Instead of a legend, you could directly colour the text in your plot title or text annotation. This is space efficient and takes advantage of viewers seeing the title first!
+
+- This plot has several messages! There's one around weekends vs weekdays, another around temperature, and a third around different types of areas. Could we make this easier for viewers by introducing this complexity over time?
