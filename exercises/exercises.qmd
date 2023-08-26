@@ -1,0 +1,166 @@
+---
+title: "Exercise 1"
+description: |
+  Test test test
+---
+
+# Introduction
+
+Before we do any visualisations, we need to load and transform the data we'll use. Run the following chunks to get set up.
+
+::: {.callout-tip}
+If you accidentally close the R terminal, you can run these chunks again in a new one!
+:::
+
+```{r}
+#| label: setup
+
+library(tidyverse)
+library(here)
+```
+
+```{r}
+#| label: load-weather
+
+weather <-
+  read_csv(
+    here("data", "weather", "HM01X_Data_086068_539639810394595.csv"),
+    col_names = c("datetime", "temperature"),
+    col_types = cols(
+      col_skip(),
+      col_datetime("%d/%m/%Y %H:%M"),
+      col_double(),
+      col_skip(),
+      col_skip(),
+      col_skip()),
+    skip = 1)
+```
+
+```{r}
+#| label: load-electricity
+
+# note to mat - i'm not sure what these columns mean
+# is bc the one i want?
+electricity <-
+  read_csv(
+    here("data", "electricity", "citipower_2005_2017.csv"),
+    # col_names = c("datetime", "temperature"),
+    # col_types = cols(
+    #   col_skip(),
+    #   col_datetime("%d/%m/%Y %H:%M"),
+    #   col_double(),
+    #   col_skip(),
+    #   col_skip(),
+    #   col_skip()),
+    # skip = 1,
+    na = c("", "nan")) |>
+  mutate(date = as.Date(`...1`)) |>
+  group_by(date) |>
+  summarise(mean_bc = mean(BC, na.rm = TRUE))
+```
+
+```{r}
+#| label: mat-code
+
+library(tidyverse)
+library(here)
+
+# these are the folders we'll use
+data_path <- here("data")
+plot_path <- here("plots")
+weather_path <-  here("data", "weather")
+dir.create(plot_path, showWarnings = FALSE)
+
+# load the min and max temperature obs in
+obs_min <-
+  read_csv(here(weather_path, "IDCJAC0011_086068_1800_Data.csv")) |>
+  janitor::clean_names() |>
+  select(year, month, day, tmin = minimum_temperature_degree_c)
+obs_max <-
+  read_csv(here(weather_path, "IDCJAC0010_086068_1800_Data.csv")) |>
+  janitor::clean_names() |>
+  select(year, month, day, tmax = maximum_temperature_degree_c)
+
+# bring min and max obs together; subset to 2015-2018
+obs <-
+  full_join(obs_min, obs_max, join_by(year, month, day)) |>
+  filter(between(year, 2005, 2018)) |>
+  mutate(date = ymd(paste(year, month, day)))
+
+# get provider info for citipower
+info <-
+  read_csv(
+    here(data_path, "electricity",
+      "DNSP_Zone_Substation_Characteristics.csv")) |>
+  janitor::clean_names() |>
+  # get first word of of the provider name
+  mutate(dnsp_short = tolower(word(distribution_network_service_provider))) |>
+  # focus on citipower only
+  filter(dnsp_short == tolower("citipower")) |>
+  select(
+    -distribution_network_service_provider,
+    -energy_asset,
+    -zone_substation_area_km2) |>
+  rename(
+    name = zone_substation_name,
+    id = zone_substation_id) |>
+  select(dnsp_short, name, id, everything())
+
+# get citipower electricity demand
+demand <-
+  read_csv(
+    here(data_path, "electricity", "citipower_2005_2017.csv"),
+    na = c("nan", "NA", "")) |>
+  # remove neagtive demand values
+  mutate(across(-datetime, ~ replace(.x, .x < 0, NA_real_))) |>
+  # calculate each day's max demand (half hourly is a bit much)
+  mutate(date = as.Date(datetime), .before = everything()) |>
+  group_by(date) |>
+  summarise(across(everything(), ~ max(.x, na.rm = TRUE))) |>
+  select(-datetime)
+
+# merge obs and demand; separate out weekends
+df <-
+  inner_join(obs, demand, join_by(date)) |>
+  mutate(
+    working = if_else(
+      weekdays(date) %in% c("Saturday", "Sunday"),
+      "Weekend",
+      "Weekday")) 
+
+# make this longer (separate row for each site) and focus on 3 sites  
+df_long <-
+  df |>
+  tidyr::pivot_longer(
+    -c(year, month, day, tmin, tmax, date, working),
+    names_to = "site",
+    values_to = "demand") |>
+  filter(site %in% c("NC", "PM", "DA")) |>
+  filter(!is.infinite(demand))
+```
+
+Let's have a look at our processed data, `df_long`:
+
+```{r}
+#| label: view-data
+View(df_long)
+```
+
+# Our first plot
+
+```{r}
+#| label: plot-base
+
+# TODO - merge the site name in from `info` too
+
+ggplot(df_long) +
+  aes(x = tmax, y = demand, colour = working) +
+  geom_point(size = 2) +
+  facet_wrap(vars(site)) +
+  scale_color_manual(values = c(Weekday = "royalblue", Weekend = "orangered")) +
+  theme_minimal() +
+  labs(
+    # title = ,
+    x = "2m air temperature [°C]",
+    y = "Electricity demand [MW]")
+```
