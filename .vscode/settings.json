@@ -3,10 +3,15 @@
     "loadNpmCommands":false,
     "commands": [
         {
-            "name": "$(debug-start) Start workshop exercises",
-            "command": "Rscript -e 'learnr::run_tutorial(\"exercises.rmd\")'",
+            "name": "$(run) Start workshop exercises",
+            "command": "Rscript -e 'learnr::run_tutorial(\"exercises/exercises.rmd\")'",
             "singleInstance": true
-        }
+        },
+        {
+          "name": "$(repo) View slides",
+          "command": "quarto preview slides/slides.qmd",
+          "singleInstance": true
+      },
     ]
   }
 }
