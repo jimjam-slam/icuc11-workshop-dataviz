@@ -1,7 +1,5 @@
 ---
-title: "Exercise 1"
-description: |
-  Test test test
+title: "Exercises"
 ---
 
 # Introduction
@@ -226,7 +224,6 @@ ggplot(df_long) +
     values = c(
       Weekday = "#33aaff",
       Weekend = "#dd0033")) +
-  theme_minimal() +
   labs(
     x = "2m air temperature [°C]",
     y = "Electricity demand [MW]")
@@ -278,7 +275,8 @@ ggplot(df_long) +
   geom_point(size = 2) +
   facet_wrap(vars(name)) +
   theme(
-    axis.title.x = element_text(face = "bold", size = rel(1.2))
+    axis.title.x = element_text(face = "bold", size = rel(1.2)),
+    axis.title.y = element_text(face = "bold", size = rel(1.2)),
   ) +
   labs(
     x = "2m air temperature [°C]",
@@ -291,7 +289,9 @@ Another set of theme options concerns the legend.
 
 Two I use nearly all the time are `legend.position = "top"` and `legend.direction = "horizontal"`: if the legend is essential to understand the plot, you probably want people to see it quickly! (You could also add `legend.justification = "left", especially if you have a plot title.)
 
-(You can also define the legend location as fractional coordinates if you want it to be inset on the plot. be careful about not covering up data if you do this!)
+(You can also define the legend location as fractional coordinates if you want it to be inset on the plot. Be careful about not covering up data if you do this!)
+
+(You can also change the title of a legend in a few ways. The easiest is to refer to the mapping it uses in the `labs()` function.)
 
 ```{r}
 #| label: ex1-largertext
@@ -307,7 +307,8 @@ ggplot(df_long) +
   ) +
   labs(
     x = "2m air temperature [°C]",
-    y = "Electricity demand [MW]")
+    y = "Electricity demand [MW]",
+    color = NULL)
 ```
 
 ## Exercise 2 Ideas
@@ -334,7 +335,7 @@ ggplot(df_long) +
   labs(
     x = "2m air temperature [°C]",
     y = "Electricity demand [MW]",
-    title = "",
+    title = "Power and temperature",
     subtitle = "Peak daily electricity demand changes with temperature",
     caption = "Data: NEAR project (BOM + CSIRO)"
     )
