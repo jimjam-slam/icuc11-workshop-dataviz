@@ -99,14 +99,15 @@ demand <-
 ```{r}
 #| label: merge-and-tidy
 
-# merge obs and demand; separate out weekends
+# merge obs and demand; separate out weekends (and further slice to 2015 onward)
 df <-
   inner_join(obs, demand, join_by(date)) |>
+  filter(year >= 2015) |>
   mutate(
     working = if_else(
       weekdays(date) %in% c("Saturday", "Sunday"),
       "Weekend",
-      "Weekday")) 
+      "Weekday"))
 
 # make this longer (separate row for each site) and focus on 3 sites  
 df_long <-
@@ -162,6 +163,21 @@ ggplot(df_long) +
     x = "2m air temperature [°C]",
     y = "Electricity demand [MW]")
 ```
+
+:::{.callout=tip}
+The interactive viewer has some not great fonts.
+
+If you save a plot by assigning it to a variable and then calling `ggsave()`,
+you'll see better looking fonts!
+
+```{r}
+#| label: font-ggsave-example
+
+my_plot <- ggplot(mtcars) + aes(mpg, hp) + geom_point() + labs(title = "Title")
+ggsave(here("test.png"), my_plot)
+```
+
+:::
 
 Not sure how to implement some of your ideas? We'll discuss together afterward, but in the mean time, scroll down for some ideas...
 
