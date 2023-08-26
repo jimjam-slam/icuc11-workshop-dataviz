@@ -226,7 +226,7 @@ The [`{ggplot2}` docs](https://ggplot2.tidyverse.org/reference/#scales) have lot
 :::{.callout-tip}
 `scale_color_manual` is particularly handy if you need to make several plots representing the same things.
 
-If readers see the same colours again, they'll assume they mean the same thing and udnerstand your next more plot more quickly!
+If readers see the same colours again, they'll assume they mean the same thing and understand your next more plot more quickly!
 :::
 
 ```{r}
