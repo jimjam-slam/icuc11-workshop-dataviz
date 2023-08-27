@@ -2,7 +2,7 @@
 
 You've opened the workshop cloud environment!
 
-There are two fils we're going to use today:
+There are two files we're going to use today:
 
 [`slides/slides.qmd`](/slides/slides.qmd) is the content of the slides that I'll present. If you'd like to follow along with them, open the file and click the "Render" button up the top right.
 
