@@ -4,7 +4,7 @@
 
 Click the button above to launch the workshop environment, or to recover an instance you were using (if you closed the browser tab). It'll take a few minutes to set itself up.
 
-Once it's ready to go,
+Once it's ready to go, your files should appear on the left sidebar.
 
-1. Click the "View workshop slides" button on the bar along the bottom to view the slides; or
-2. click the "Start workshop exercises" button next to it to launch the interactive exercises.
+1. Open `slides/slides.qmd` and then click the "Render" button the in top-right of the editor to follow along with the slides; or
+2. Open `exercises/exercises.qmd` to see the exercises. Click "Run code" above any of the code chunks to run them.
